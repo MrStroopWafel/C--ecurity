@@ -66,6 +66,11 @@ bool KillSwitch() {
            (GetAsyncKeyState(VK_MULTIPLY) < 0);
 }
 
+char* GetUser() {
+    char* user = getenv("USERNAME");
+    return user;
+}
+
 // main functie
 int main()
 {
