@@ -1,8 +1,11 @@
 #include <iostream>
 
+
 int main()
 {
-    std::cout << "Hello World" << std::endl;
+    
+    char * user = getenv("username");
+    std::cout << user << std::endl;
 }
 
 
