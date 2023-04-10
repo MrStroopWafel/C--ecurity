@@ -1,12 +1,10 @@
-#include <iostream>
+/*
+meow-meow messagebox
+author: @cocomelonc
+*/
+#include <windows.h>
 
-
-int main()
-{
-    
-    char * user = getenv("username");
-    std::cout << user << std::endl;
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  MessageBoxA(NULL, "Meow-meow!","=^..^=", MB_OK);
+  return 0;
 }
-
-
-//test123 test123
