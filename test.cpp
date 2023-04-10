@@ -5,6 +5,6 @@ author: @cocomelonc
 */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
   ShowWindow(GetConsoleWindow(), SW_HIDE);
-  MessageBoxA(NULL, "Meow-meow!","=^..^=", MB_OK);
+  MessageBoxA(NULL, "pwd","You have been infected!?!!!", MB_OK);
   return 0;
 }
