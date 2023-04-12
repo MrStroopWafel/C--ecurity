@@ -1,0 +1,5 @@
+g++ -fdiagnostics-color=always -g send.cpp -o send.exe -lws2_32
+om send te builden
+
+g++ -fdiagnostics-color=always -g receive.cpp -o receive.exe -lws2_32
+om recieve te builden
