@@ -3,10 +3,7 @@
 
 int main()
 {
-    char system32[MAX_PATH];
-    GetSystemDirectoryA(system32, sizeof(system32));
-
-    std::cout << system32 << std::endl;
-
-    return 0;
+    const char* dirX = "D:\\zuyd\\C++ecurity\\test.exe";
+    SetFileAttributes(dirX,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+    //SetFileAttributes(path,FILE_ATTRIBUTE_NORMAL);
  }

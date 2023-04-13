@@ -8,7 +8,7 @@ https://cocomelonc.github.io/tutorial/2022/04/20/malware-pers-1.html
 #include <string.h>
 #include <filesystem>
 
-int main(int argc, char* argv[]) {
+int main() {
   HKEY hkey = NULL;
   // malicious app
   std::string current_File = std::filesystem::current_path().string() + "\\test.exe";

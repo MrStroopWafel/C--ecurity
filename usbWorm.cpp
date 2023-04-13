@@ -47,8 +47,8 @@ int FindDrv(const char *drive)
         strcat(dirX, "\\");
         strcat(dirX, "test.exe");
 
-        //std::cout << "path: " << path << std::endl;
-        //std::cout << "dirX: " << dirX << std::endl;
+        std::cout << path << std::endl;
+        std::cout << dirX << std::endl;
 
         CopyFile(path,dirX,TRUE); 
         SetFileAttributes(path,FILE_ATTRIBUTE_NORMAL|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
